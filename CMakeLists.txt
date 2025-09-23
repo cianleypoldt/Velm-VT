@@ -19,6 +19,17 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 # Create executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+include(FetchContent)
+FetchContent_Declare(
+  spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG v1.14.1   # pin to a release
+)
+FetchContent_MakeAvailable(spdlog)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
+
+
 # Link GLM and OpenGL
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
