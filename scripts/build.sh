@@ -1,6 +1,5 @@
 mkdir build
 cd build
-#-DCMAKE_BUILD_TYPE=Release
 cmake  ..
 if [ $? -ne 0 ]; then
     echo "cmake failed"
@@ -15,4 +14,4 @@ fi
 
 echo "Build succeeded"
 
-./Zenoa
+./VlemVT
