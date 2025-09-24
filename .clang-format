@@ -62,7 +62,7 @@ BreakConstructorInitializers: AfterColon
 # BreakFunctionDefinitionParameters: false
 BreakInheritanceList: AfterComma
 BreakStringLiterals: true
-# BreakTemplateDeclarations: Yes
+BreakTemplateDeclarations: No
 ColumnLimit:     120
 CommentPragmas:  '^ IWYU pragma:'
 CompactNamespaces: false
