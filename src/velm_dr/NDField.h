@@ -45,6 +45,11 @@ template <typename T, std::size_t N> class NDField {
         return data_[compute_offset(idx...)];
     }
 
+    // Linear access operator
+    T & operator[](std::size_t index) { return data_[index]; }
+
+    const T & operator[](std::size_t index) const { return data_[index]; }
+
     // Get dimension sizes
     std::size_t size(std::size_t dim) const {
         if (dim >= N) {
