@@ -39,10 +39,17 @@ jobs:
         run: |
           mkdir -p build
           cd build
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then
+            C_COMPILER=gcc
+            CXX_COMPILER=g++
+          elif [ "${{ matrix.compiler }}" = "clang" ]; then
+            C_COMPILER=clang
+            CXX_COMPILER=clang++
+          fi
           cmake -G Ninja \
                 -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-                -DCMAKE_C_COMPILER=${{ matrix.compiler }} \
-                -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}++ \
+                -DCMAKE_C_COMPILER=$C_COMPILER \
+                -DCMAKE_CXX_COMPILER=$CXX_COMPILER \
                 ..
 
       - name: Build
