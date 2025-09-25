@@ -13,12 +13,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # -----------------------------
-# Header-only / local dependencies
+# Include directories
 # -----------------------------
-# GLAD
-set(GLAD_SRC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/src/glad.c)
-
-# Include directories for header-only libraries
 include_directories(
     third_party/glad/include
     third_party/glm
@@ -28,7 +24,7 @@ include_directories(
 )
 
 # -----------------------------
-# System libraries via Pacman / package manager
+# System libraries
 # -----------------------------
 find_package(PkgConfig REQUIRED)
 
@@ -42,37 +38,43 @@ pkg_check_modules(HDF5 REQUIRED hdf5)
 include_directories(${HDF5_INCLUDE_DIRS})
 link_directories(${HDF5_LIBRARY_DIRS})
 
-# VTK (system-installed)
-# Set VTK_DIR if needed, e.g., /usr/lib/cmake/vtk-9.1
-# On Arch/Manjaro, you can check the path with: pacman -Ql vtk | grep CMake
-# find_package(VTK REQUIRED COMPONENTS
-#     vtkCommonCore
-#     vtkRenderingCore
-#     vtkFiltersCore
-# )
-
-# include(${VTK_USE_FILE})
-
 # -----------------------------
 # Gather source files
 # -----------------------------
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
+file(GLOB_RECURSE VLEMVT_SOURCES CONFIGURE_DEPENDS src/*.cpp)
+set(GLAD_SRC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/src/glad.c)
 
 # -----------------------------
-# Create executable
+# Create library
 # -----------------------------
-add_executable(${PROJECT_NAME} ${SOURCES} ${GLAD_SRC})
-
-# -----------------------------
-# Link libraries
-# -----------------------------
+add_library(${PROJECT_NAME} STATIC ${VLEMVT_SOURCES} ${GLAD_SRC})
 target_link_libraries(${PROJECT_NAME}
     ${GLFW_LIBRARIES}
     ${HDF5_LIBRARIES}
-    # ${VTK_LIBRARIES}
 )
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
 
 # -----------------------------
-# Compiler options
+# Enable testing
 # -----------------------------
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+include(CTest)
+enable_testing()
+
+# -----------------------------
+# GoogleTest (system-installed)
+# -----------------------------
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+# -----------------------------
+# Add test executable
+# -----------------------------
+file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS tests/*.cpp)
+add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
+target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${PROJECT_NAME} GTest::GTest GTest::Main)
+
+# -----------------------------
+# Register tests
+# -----------------------------
+include(GoogleTest)
+gtest_discover_tests(${PROJECT_NAME}_tests)

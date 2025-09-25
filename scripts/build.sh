@@ -1,3 +1,11 @@
+# First, populate git submodules
+echo "Populating git submodules..."
+git submodule update --init --recursive
+if [ $? -ne 0 ]; then
+    echo "Failed to populate git submodules"
+    exit 1
+fi
+
 mkdir build
 cd build
 cmake  ..
@@ -13,5 +21,3 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Build succeeded"
-
-./VlemVT
