@@ -16,11 +16,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Include directories
 # -----------------------------
 include_directories(
-    third_party/glad/include
+    include          # added
+    src              # added
     third_party/glm
     third_party/imgui
     third_party/spdlog/include
     third_party/nlohmann_json/include
+    third_party/glad/include  # GLAD header-only
 )
 
 # -----------------------------
@@ -42,13 +44,17 @@ link_directories(${HDF5_LIBRARY_DIRS})
 # Gather source files
 # -----------------------------
 file(GLOB_RECURSE VLEMVT_SOURCES CONFIGURE_DEPENDS src/*.cpp)
-set(GLAD_SRC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/src/glad.c)
 
 # -----------------------------
 # Create library
 # -----------------------------
-add_library(${PROJECT_NAME} STATIC ${VLEMVT_SOURCES} ${GLAD_SRC})
-target_link_libraries(${PROJECT_NAME}
+add_library(${PROJECT_NAME} STATIC ${VLEMVT_SOURCES})
+target_include_directories(${PROJECT_NAME} PUBLIC
+    include
+    src
+    third_party/glad/include
+)
+target_link_libraries(${PROJECT_NAME} #
     ${GLFW_LIBRARIES}
     ${HDF5_LIBRARIES}
 )

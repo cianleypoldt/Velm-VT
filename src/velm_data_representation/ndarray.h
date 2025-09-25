@@ -114,8 +114,9 @@ template <typename T, std::size_t N> const T * ndarray<T, N>::end() const {
 }
 
 template <typename T, std::size_t N> void ndarray<T, N>::fill(T value) {
+    T * p = begin();
     for (std::size_t i = 0; i < total_elements(); ++i) {
-        data[i] = value;
+        *(p++) = value;
     }
 }
 

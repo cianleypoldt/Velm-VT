@@ -21,3 +21,5 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Build succeeded"
+
+./VlemVT_tests
