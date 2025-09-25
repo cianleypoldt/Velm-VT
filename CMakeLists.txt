@@ -12,6 +12,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # -----------------------------
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    message(STATUS "Enabling coverage flags")
+    target_compile_options(${PROJECT_NAME} PRIVATE -O0 -g --coverage)
+    target_link_libraries(${PROJECT_NAME} PRIVATE --coverage)
+    target_compile_options(${PROJECT_NAME}_tests PRIVATE -O0 -g --coverage)
+    target_link_libraries(${PROJECT_NAME}_tests PRIVATE --coverage)
+endif()
+
 # -----------------------------
 # Include directories
 # -----------------------------
