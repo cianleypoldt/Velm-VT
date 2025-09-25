@@ -1,4 +1,4 @@
-#include "velm_data_representation/ndarray.h"
+#include "velm/core/types/ndarray.h"
 
 #include <gtest/gtest.h>
 
