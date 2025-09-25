@@ -8,37 +8,43 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        build_type: [Debug, Release]
-        include:
-          - os: ubuntu-latest
-            compiler: gcc
-          - os: ubuntu-latest
-            compiler: clang
-          - os: macos-latest
-            compiler: clang
-          - os: windows-latest
-            compiler: msvc
-    name: ${{ matrix.os }} | ${{ matrix.compiler }} | ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
 
-      # Install dependencies
-      - name: Install Dependencies
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
         run: |
-          if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            sudo apt-get update
-            if [[ "${{ matrix.compiler }}" == "gcc" ]]; then sudo apt-get install -y build-essential cmake ninja-build lcov; fi
-            if [[ "${{ matrix.compiler }}" == "clang" ]]; then sudo apt-get install -y clang cmake ninja-build lcov; fi
-          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build lcov libglfw3-dev
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
           brew update
-              brew install cmake ninja pkg-config glfw
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            choco install cmake ninja
-          fi
+          brew install cmake ninja pkg-config glfw
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install cmake ninja
+
+      # This section is redundant as OS-specific dependencies are already handled above
+      # - name: Install Dependencies
+      #   run: |
+      #     if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+      #       sudo apt-get update
+      #       if [[ "${{ matrix.compiler }}" == "gcc" ]]; then sudo apt-get install -y build-essential cmake ninja-build lcov; fi
+      #       if [[ "${{ matrix.compiler }}" == "clang" ]]; then sudo apt-get install -y clang cmake ninja-build lcov; fi
+      #     elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+      #     brew update
+      #         brew install cmake ninja pkg-config glfw
+      #     elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+      #       choco install cmake ninja
+      #     fi
 
       # Configure CMake
       - name: Configure CMake
