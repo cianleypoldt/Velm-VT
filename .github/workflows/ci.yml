@@ -28,6 +28,7 @@ jobs:
           # Verify GLFW installation
           pkg-config --exists --print-errors glfw3
           pkg-config --cflags --libs glfw3
+          echo "GLFW_DIR=/usr" >> $GITHUB_ENV
 
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
@@ -37,6 +38,9 @@ jobs:
           # Verify GLFW installation
           pkg-config --exists --print-errors glfw3
           pkg-config --cflags --libs glfw3
+          # Find Homebrew's GLFW installation path
+          GLFW_PREFIX=$(brew --prefix glfw)
+          echo "GLFW_DIR=$GLFW_PREFIX" >> $GITHUB_ENV
 
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
@@ -45,9 +49,15 @@ jobs:
           # Verify GLFW is in PATH
           if (Test-Path "C:\Program Files\GLFW\include\GLFW\glfw3.h") {
             echo "GLFW found at default installation path"
+            echo "GLFW_DIR=C:\Program Files\GLFW" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
           } else {
             echo "GLFW not found in default location, searching..."
-            Get-ChildItem -Path "C:\" -Filter "glfw3.h" -Recurse -ErrorAction SilentlyContinue | ForEach-Object { echo "Found at: $($_.FullName)" }
+            $glfwHeader = Get-ChildItem -Path "C:\" -Filter "glfw3.h" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($glfwHeader) {
+              $glfwDir = $glfwHeader.Directory.Parent.Parent.FullName
+              echo "Found GLFW at: $glfwDir"
+              echo "GLFW_DIR=$glfwDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            }
           }
 
       - name: Configure CMake
@@ -65,7 +75,7 @@ jobs:
                 -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
                 -DCMAKE_C_COMPILER=$C_COMPILER \
                 -DCMAKE_CXX_COMPILER=$CXX_COMPILER \
-                -DCMAKE_PREFIX_PATH="${{ runner.os == 'Windows' && 'C:\Program Files\GLFW' || '' }}" \
+                -DCMAKE_PREFIX_PATH="${{ env.GLFW_DIR }}" \
                 ..
 
       - name: Build
