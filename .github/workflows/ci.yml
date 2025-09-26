@@ -67,9 +67,11 @@ jobs:
           cmake --build . --config Release
 
       - name: Run Tests
+        shell: bash
         run: |
-          cd build/bin
-          if: matrix.os == 'windows-latest'
-          run: .\VelmVT_tests.exe
-          if: matrix.os != 'windows-latest'
-          run: ./VelmVT_tests.exe
+          cd build
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            ./bin/Release/VelmVT_tests.exe
+          else
+            ./bin/VelmVT_tests
+          fi
