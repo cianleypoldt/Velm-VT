@@ -69,4 +69,7 @@ jobs:
       - name: Run Tests
         run: |
           cd build/bin
-          ./VelmVT_tests.exe
+          if: matrix.os == 'windows-latest'
+          run: .\VelmVT_tests.exe
+          if: matrix.os != 'windows-latest'
+          run: ./VelmVT_tests.exe
