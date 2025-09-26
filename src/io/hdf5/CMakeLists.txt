@@ -1,2 +1,5 @@
-target_include_directories(VlemVT PRIVATE ${HDF5_INCLUDE_DIRS})
-target_link_libraries(VlemVT PRIVATE ${HDF5_LIBRARIES})
+find_package(HDF5 REQUIRED)
+
+include_directories(${HDF5_INCLUDE_DIRS})
+
+link_libraries(${HDF5_LIBRARIES})

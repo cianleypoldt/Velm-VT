@@ -22,4 +22,4 @@ fi
 
 echo "Build succeeded"
 
-./VlemVT_tests
+./bin/VelmVT_tests
