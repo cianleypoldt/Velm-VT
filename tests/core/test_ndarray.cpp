@@ -1,4 +1,5 @@
 #include "velm/core/ndarray.h"
+#include "velm/velm.h"
 
 #include <cassert>
 #include <iostream>
@@ -50,7 +51,6 @@ void test_initialization_and_fill() {
             assert(arr2d(i, j) == -3);
         }
     }
-
     std::cout << "Initialization and fill test passed.\n";
 }
 

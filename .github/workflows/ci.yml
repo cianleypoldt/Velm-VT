@@ -1,94 +1,72 @@
 name: Velm-VT CI
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+on: [push, pull_request]
 
 jobs:
-  build-and-test:
+  build:
+    name: ${{ matrix.os }}-${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        compiler: [gcc, clang]
-        build_type: [Debug, Release]
-    runs-on: ${{ matrix.os }}
+        compiler: [gcc, clang, msvc]
+        exclude:
+          - os: ubuntu-latest
+            compiler: msvc
+          - os: macos-latest
+            compiler: msvc
+          - os: windows-latest
+            compiler: gcc
+          - os: windows-latest
+            compiler: clang
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
+      - uses: actions/checkout@v2
 
-      - name: Install dependencies (Linux)
-        if: runner.os == 'Linux'
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build lcov libglfw3-dev pkg-config libhdf5-dev libgtest-dev
-          # Verify GLFW installation
-          pkg-config --exists --print-errors glfw3
-          pkg-config --cflags --libs glfw3
-          echo "GLFW_DIR=/usr" >> $GITHUB_ENV
+          sudo apt-get install -y libglfw3-dev libhdf5-dev
 
       - name: Install dependencies (macOS)
-        if: runner.os == 'macOS'
+        if: matrix.os == 'macos-latest'
         run: |
-          brew update
-          brew install cmake ninja pkg-config glfw hdf5 googletest
-          # Verify GLFW installation
-          pkg-config --exists --print-errors glfw3
-          pkg-config --cflags --libs glfw3
-          # Find Homebrew's GLFW installation path
-          GLFW_PREFIX=$(brew --prefix glfw)
-          echo "GLFW_DIR=$GLFW_PREFIX" >> $GITHUB_ENV
+          brew install glfw hdf5
 
       - name: Install dependencies (Windows)
-        if: runner.os == 'Windows'
+        if: matrix.os == 'windows-latest'
         run: |
-          choco install -y cmake ninja pkgconfiglite glfw hdf5
-          # Verify GLFW is in PATH
-          if (Test-Path "C:\Program Files\GLFW\include\GLFW\glfw3.h") {
-            echo "GLFW found at default installation path"
-            echo "GLFW_DIR=C:\Program Files\GLFW" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          } else {
-            echo "GLFW not found in default location, searching..."
-            $glfwHeader = Get-ChildItem -Path "C:\" -Filter "glfw3.h" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-            if ($glfwHeader) {
-              $glfwDir = $glfwHeader.Directory.Parent.Parent.FullName
-              echo "Found GLFW at: $glfwDir"
-              echo "GLFW_DIR=$glfwDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-            }
-          }
+          vcpkg install glfw3:x64-windows hdf5:x64-windows
 
-      - name: Configure CMake
+      - name: Configure (GCC)
+        if: matrix.compiler == 'gcc'
         run: |
           mkdir -p build
           cd build
-          if [ "${{ matrix.compiler }}" = "gcc" ]; then
-            C_COMPILER=gcc
-            CXX_COMPILER=g++
-          elif [ "${{ matrix.compiler }}" = "clang" ]; then
-            C_COMPILER=clang
-            CXX_COMPILER=clang++
-          fi
-          cmake -G Ninja \
-                -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-                -DCMAKE_C_COMPILER=$C_COMPILER \
-                -DCMAKE_CXX_COMPILER=$CXX_COMPILER \
-                -DCMAKE_PREFIX_PATH="${{ env.GLFW_DIR }}" \
-                ..
+          cmake .. -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+
+      - name: Configure (Clang)
+        if: matrix.compiler == 'clang'
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+
+      - name: Configure (MSVC)
+        if: matrix.compiler == 'msvc'
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
 
       - name: Build
-        run: cd build && ninja
-
-      - name: Run Tests
-        run: cd build && ctest --output-on-failure
-
-      - name: Upload Coverage
-        if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'clang' && matrix.build_type == 'Debug'
         run: |
           cd build
-          lcov --capture --directory . --output-file coverage.info
-          lcov --remove coverage.info '/usr/*' --output-file coverage.info
-          lcov --list coverage.info
-          bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov upload failed"
+          cmake --build . --config Release
+
+      - name: Run Tests
+        run: |
+          cd build/bin
+          ./VelmVT_tests

@@ -1,3 +1,7 @@
+#include "velm/velm.h"
+
+#include <GLFW/glfw3.h>
+
 int dummy() {
-    return 1;
+    return 0;
 }

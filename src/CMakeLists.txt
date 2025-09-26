@@ -6,7 +6,7 @@ add_subdirectory(io)
 add_subdirectory(render)
 
 # Export include path for installation
-target_include_directories(${PROJECT_NAME} INTERFACE
+target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
