@@ -1,4 +1,4 @@
-#include "velm/core/types/ndarray.h"
+#include "velm/core/ndarray.h"
 
 #include <cassert>
 #include <iostream>
