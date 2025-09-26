@@ -69,4 +69,4 @@ jobs:
       - name: Run Tests
         run: |
           cd build/bin
-          ./VelmVT_tests
+          ./VelmVT_tests.exe
