@@ -4,7 +4,7 @@
 #include <cassert>
 #include <iostream>
 
-using vlem_DR::ndarray;
+using velm_DR::ndarray;
 
 // Test default initialization and fill
 void test_initialization_and_fill() {

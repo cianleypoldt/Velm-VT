@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <cstdlib>
 
-namespace vlem_DR {
+namespace velm_DR {
 
 /*
  * vulnerabilities:
@@ -10,8 +10,10 @@ namespace vlem_DR {
  *
  */
 
-template <typename T, std::size_t N> struct ndarray {
-    T *         data = nullptr;
+template <typename T, std::size_t N> class ndarray {
+  public:
+    T * data = nullptr;
+
     std::size_t dims[N];
     std::size_t strides[N];
 
@@ -192,4 +194,4 @@ template <typename T, std::size_t N> ndarray<T, N>::ndarray(ndarray && grid_b) n
     grid_b.data = nullptr;
 }
 
-};  // namespace vlem_DR
+};  // namespace velm_DR
